@@ -174,26 +174,20 @@ class MainActivity : AppCompatActivity() {
         else{
             val bitmap  = MediaStore.Images.Media.getBitmap(this.contentResolver, Uri.parse(status.fileUri))
             val fileName = "${System.currentTimeMillis()}.jpg"
-            var fos:OutputStream?=null
+            var fos:OutputStream? = null
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
-                contentResolver.also {
-                    resolver->
-                    val contentValues = ContentValues().apply {
-                        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                        put(MediaStore.MediaColumns.MIME_TYPE,"image/jpg")
-                        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
-                    }
-
-                    val imageUri:Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                    fos = imageUri?.let {
-                        resolver.openOutputStream(it)
-                    }
+            contentResolver.also {
+                resolver->
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                    put(MediaStore.MediaColumns.MIME_TYPE,"image/jpg")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
                 }
-            }else{
-                val imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                val image = File(imageDir,fileName)
-                fos = FileOutputStream(image)
+
+                val imageUri:Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                fos = imageUri?.let {
+                    resolver.openOutputStream(it)
+                }
             }
             fos?.use {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
