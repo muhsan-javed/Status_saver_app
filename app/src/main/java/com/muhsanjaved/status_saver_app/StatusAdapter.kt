@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class StatusAdapter(private val context:Context,
-                    private var modelClass:ArrayList<ModelClass>) :
+                    private var modelClass:ArrayList<ModelClass>, private val clickListener:(ModelClass)->Unit) :
     RecyclerView.Adapter<StatusAdapter.StatusViewHolder>(){
 
         class StatusViewHolder(itemView:View): RecyclerView.ViewHolder(itemView){
@@ -42,6 +42,9 @@ class StatusAdapter(private val context:Context,
         Glide.with(context).load(Uri.parse(modelClass[position].fileUri)).into(holder.ivStatus)
 
 
+        holder.ivStatus.setOnClickListener {
+            clickListener(modelClass[position])
+        }
     }
 
 }
