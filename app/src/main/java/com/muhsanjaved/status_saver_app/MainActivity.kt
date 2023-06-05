@@ -25,6 +25,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 
+// Completed Project Checkout Your own Status Save Application
 class MainActivity : AppCompatActivity() {
 
     private lateinit var rvStatusList:RecyclerView
@@ -35,7 +36,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        supportActionBar!!.title="All Status"
+        supportActionBar!!.title="All Status" // Application Title
+
         rvStatusList = findViewById(R.id.re_status_list)
         statusList = ArrayList()
 
