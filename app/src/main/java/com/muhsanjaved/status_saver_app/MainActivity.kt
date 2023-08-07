@@ -28,33 +28,36 @@ import java.io.OutputStream
 // Completed Project Checkout Your own Status Save Application
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var rvStatusList:RecyclerView
-    private lateinit var statusList:ArrayList<ModelClass>
+    private lateinit var rvStatusList: RecyclerView
+    private lateinit var statusList: ArrayList<ModelClass>
     private lateinit var statusAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        supportActionBar!!.title="All Status" // Application Title
+        supportActionBar!!.title = "All Status" // Application Title
 
         rvStatusList = findViewById(R.id.re_status_list)
         statusList = ArrayList()
 
 
         val result = readDataFromPrefs()
-        if (result){
+        if (result) {
             val sh = getSharedPreferences("DATA_PATH", MODE_PRIVATE)
-            val uriPath = sh.getString("PATH","")
+            val uriPath = sh.getString("PATH", "")
 
-            contentResolver.takePersistableUriPermission(Uri.parse(uriPath), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(
+                Uri.parse(uriPath),
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
 
             if (uriPath != null) {
 
                 val fileDoc = DocumentFile.fromTreeUri(applicationContext, Uri.parse(uriPath))
-                for (file:DocumentFile in fileDoc!!.listFiles()){
-                    if (!file.name!!.endsWith(".nomedia")){
-                        val modelClass = ModelClass(file.name!!,file.uri.toString())
+                for (file: DocumentFile in fileDoc!!.listFiles()) {
+                    if (!file.name!!.endsWith(".nomedia")) {
+                        val modelClass = ModelClass(file.name!!, file.uri.toString())
                         statusList.add(modelClass)
                     }
                 }
@@ -62,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 setUpRecyclerView(statusList)
             }
 
-        }else{
+        } else {
             getFolderPermission()
         }
 
@@ -91,15 +94,18 @@ class MainActivity : AppCompatActivity() {
 
             val sharedPreferences = getSharedPreferences("DATA_PATH", MODE_PRIVATE)
             val myEdit = sharedPreferences.edit()
-            myEdit.putString("PATH",treeUri.toString())
+            myEdit.putString("PATH", treeUri.toString())
             myEdit.apply()
 
             if (treeUri != null) {
-                contentResolver.takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                contentResolver.takePersistableUriPermission(
+                    treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
                 val fileDoc = DocumentFile.fromTreeUri(applicationContext, treeUri)
-                for (file:DocumentFile in fileDoc!!.listFiles()){
-                    if (!file.name!!.endsWith(".nomedia")){
-                        val modelClass = ModelClass(file.name!!,file.uri.toString())
+                for (file: DocumentFile in fileDoc!!.listFiles()) {
+                    if (!file.name!!.endsWith(".nomedia")) {
+                        val modelClass = ModelClass(file.name!!, file.uri.toString())
                         statusList.add(modelClass)
                     }
                 }
@@ -114,20 +120,20 @@ class MainActivity : AppCompatActivity() {
 
         statusAdapter = applicationContext?.let {
             StatusAdapter(
-                it,statusList
-            ){
-                selectStatusItem:ModelClass-> listItemClicked(selectStatusItem)
+                it, statusList
+            ) { selectStatusItem: ModelClass ->
+                listItemClicked(selectStatusItem)
             }
         }!!
 
         rvStatusList.apply {
             setHasFixedSize(true)
-            layoutManager= StaggeredGridLayoutManager(2,LinearLayoutManager.VERTICAL)
+            layoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
             adapter = statusAdapter
         }
     }
 
-    private fun listItemClicked(status:ModelClass){
+    private fun listItemClicked(status: ModelClass) {
 
         val dialog = Dialog(this@MainActivity)
         dialog.setContentView(R.layout.custom_dialog)
@@ -142,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveFile(status: ModelClass) {
         // Video Save
-        if (status.fileUri.endsWith(".mp4")){
+        if (status.fileUri.endsWith(".mp4")) {
             val inputStream = contentResolver.openInputStream(Uri.parse(status.fileUri))
             val fileName = "${System.currentTimeMillis()}.mp4"
 
@@ -150,7 +156,10 @@ class MainActivity : AppCompatActivity() {
                 val values = ContentValues()
                 values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                 values.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH,Environment.DIRECTORY_DOCUMENTS + "/Videos/")
+                values.put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_DOCUMENTS + "/Videos/"
+                )
 
                 val uri = contentResolver.insert(
                     MediaStore.Files.getContentUri("external"), values
@@ -160,33 +169,34 @@ class MainActivity : AppCompatActivity() {
                     contentResolver.openOutputStream(it)
                 }!!
 
-                if (inputStream != null){
+                if (inputStream != null) {
                     outputStream.write(inputStream.readBytes())
                 }
 
                 outputStream.close()
 
                 Toast.makeText(applicationContext, "VIDEO SAVE", Toast.LENGTH_SHORT).show()
-            }catch (e:IOException){
+            } catch (e: IOException) {
                 Toast.makeText(applicationContext, "FAILED", Toast.LENGTH_SHORT).show()
             }
 
         }
         // IMage Save
-        else{
-            val bitmap  = MediaStore.Images.Media.getBitmap(this.contentResolver, Uri.parse(status.fileUri))
+        else {
+            val bitmap =
+                MediaStore.Images.Media.getBitmap(this.contentResolver, Uri.parse(status.fileUri))
             val fileName = "${System.currentTimeMillis()}.jpg"
-            var fos:OutputStream? = null
+            var fos: OutputStream? = null
 
-            contentResolver.also {
-                resolver->
+            contentResolver.also { resolver ->
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                    put(MediaStore.MediaColumns.MIME_TYPE,"image/jpg")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
                 }
 
-                val imageUri:Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                val imageUri: Uri? =
+                    resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
                 fos = imageUri?.let {
                     resolver.openOutputStream(it)
                 }
@@ -201,9 +211,9 @@ class MainActivity : AppCompatActivity() {
     private fun readDataFromPrefs(): Boolean {
 
         val sh = getSharedPreferences("DATA_PATH", MODE_PRIVATE)
-        val uriPath = sh.getString("PATH","")
-        if (uriPath != null){
-            if (uriPath.isEmpty()){
+        val uriPath = sh.getString("PATH", "")
+        if (uriPath != null) {
+            if (uriPath.isEmpty()) {
                 return false
             }
         }
